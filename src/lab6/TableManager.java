@@ -11,6 +11,8 @@ import org.apache.poi.xwpf.usermodel.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.StyleConstants;
 
 public class TableManager {
 
@@ -136,24 +138,28 @@ public class TableManager {
      // Busca todas las JTable dentro del JTextPane
      //y las guarda en el documento .docx con Apache POI
      
+
     public void guardarTablasEnDocx(XWPFDocument doc) {
-        // Recorrer los componentes insertados en el JTextPane
-        Component[] componentes = textPane.getComponents();
+    // Iterar el documento del JTextPane buscando componentes
+        javax.swing.text.StyledDocument styledDoc = textPane.getStyledDocument();
+        int largo = styledDoc.getLength();
 
-        for (Component comp : componentes) {
-            // Buscar JScrollPane que contenga JTable
+        for (int i = 0; i < largo; i++) {
+        javax.swing.text.Element elem = styledDoc.getCharacterElement(i);
+        AttributeSet attrs = elem.getAttributes();
+
+         // Los componentes insertados tienen este atributo
+            Object comp = StyleConstants.getComponent(attrs);
+
             if (comp instanceof JScrollPane) {
-                JScrollPane scroll = (JScrollPane) comp;
-                Component vista = scroll.getViewport().getView();
-
-                if (vista instanceof JTable) {
-                    JTable tabla = (JTable) vista;
-                    guardarJTableEnDocx(doc, tabla);
+             JScrollPane scroll = (JScrollPane) comp;
+             Component vista = scroll.getViewport().getView();
+             if (vista instanceof JTable) {
+                guardarJTableEnDocx(doc, (JTable) vista);
                 }
             }
         }
     }
-
     
      //Convierte una JTable a XWPFTable y la agrega al documento
      

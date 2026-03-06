@@ -7,27 +7,23 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.StyleConstants;
 
 public class GUI extends JFrame {
 
-    //Componentes
     private JTextPane textPane;
     private JComboBox<String> cmbFuente;
     private JComboBox<String> Tamaño;
     private JLabel lblColorActual;
     private JPanel panelColoresRecientes;
 
-    //botones
-    JButton btnAbrir = new JButton("📂"); // NUEVO
-    JButton btnGuardar = new JButton("💾");
-    JButton btnColor = new JButton("...");
+    JButton btnAbrir    = new JButton("📂");
+    JButton btnGuardar  = new JButton("💾");
+    JButton btnColor    = new JButton("...");
     JToggleButton btnNegrita;
     JToggleButton btnCursiva;
     JToggleButton btnSubrayado;
-    JButton btnTabla = new JButton("Tabla");
+    JButton btnTabla    = new JButton("Tabla");
 
-    //GESTORES (NUEVO)
     private FormatoTexto formato;
     private TableManager tablas;
     private FileManager fileManager;
@@ -38,54 +34,54 @@ public class GUI extends JFrame {
     };
 
     private boolean yaGuardo = true;
-
     private Color[] UltimosColores = {};
     private Color colorActual = Color.BLACK;
 
     public GUI() {
-
         setTitle("Editor de texto");
         setSize(900, 650);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        add(crearBarraHerramientas(), BorderLayout.NORTH);
-        add(crearPanelCentral(), BorderLayout.CENTER);
+        // 1. Crear editor PRIMERO para que textPane no sea null
+        JScrollPane editorScroll = crearEditor();
 
-        //INICIALIZAR LOGICA (NUEVO)
-        formato = new FormatoTexto(textPane);
-        tablas = new TableManager(textPane);
+        add(crearBarraHerramientas(), BorderLayout.NORTH);
+        add(crearPanelCentral(editorScroll), BorderLayout.CENTER);
+
+        // 2. Inicializar gestores DESPUÉS de que textPane existe
+        formato     = new FormatoTexto(textPane);
+        tablas      = new TableManager(textPane);
         fileManager = new FileManager(textPane, tablas);
 
+        // 3. Listener de cambios
         textPane.getDocument().addDocumentListener(new DocumentListener() {
-            public void insertUpdate(DocumentEvent e) { yaGuardo = false; }
-            public void removeUpdate(DocumentEvent e) { yaGuardo = false; }
+            public void insertUpdate(DocumentEvent e)  { yaGuardo = false; }
+            public void removeUpdate(DocumentEvent e)  { yaGuardo = false; }
             public void changedUpdate(DocumentEvent e) { yaGuardo = false; }
         });
 
+        // 4. Listener de cierre
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 if (yaGuardo) {
                     dispose();
                 } else {
-                    int respuesta = JOptionPane.showConfirmDialog(
-                            GUI.this,
-                            "Tienes cambios sin guardar. ¿Deseas salir de todas formas?",
-                            "Advertencia",
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.WARNING_MESSAGE
+                    int r = JOptionPane.showConfirmDialog(
+                        GUI.this,
+                        "Tienes cambios sin guardar. ¿Deseas salir?",
+                        "Advertencia",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
                     );
-                    if (respuesta == JOptionPane.YES_OPTION) {
-                        dispose();
-                    }
+                    if (r == JOptionPane.YES_OPTION) dispose();
                 }
             }
         });
 
-        //EVENTOS ==========================
-
+        // 5. Eventos de botones
         btnAbrir.addActionListener(e -> {
             String ruta = fileManager.elegirRutaAbrir();
             if (ruta != null) {
@@ -94,214 +90,195 @@ public class GUI extends JFrame {
             }
         });
 
-        btnGuardar.addActionListener(e -> {
-            String ruta = fileManager.elegirRutaGuardar();
-            if (ruta != null) {
-                fileManager.guardarArchivo(ruta);
-                yaGuardo = true;
-            }
-        });
+btnGuardar.addActionListener(e -> {
+    String ruta = fileManager.elegirRutaGuardar();
+    System.out.println("Ruta elegida: " + ruta);
+    if (ruta != null) {
+        try {
+            fileManager.guardarArchivo(ruta);
+            System.out.println("Guardado exitoso en: " + ruta);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+        yaGuardo = true;
+    }
+});
 
         btnNegrita.addActionListener(e ->
-                formato.AplicarNegrita(btnNegrita.isSelected()));
+            formato.AplicarNegrita(btnNegrita.isSelected()));
 
         btnCursiva.addActionListener(e ->
-                formato.AplicarCursiva(btnCursiva.isSelected()));
+            formato.AplicarCursiva(btnCursiva.isSelected()));
 
         btnSubrayado.addActionListener(e ->
-                formato.AplicarSubrayado(btnSubrayado.isSelected()));
+            formato.AplicarSubrayado(btnSubrayado.isSelected()));
 
         btnTabla.addActionListener(e ->
-                tablas.mostrarDialogoCrearTabla(this));
+            tablas.mostrarDialogoCrearTabla(this));
 
         btnColor.addActionListener(e -> {
-
             Color elegido = JColorChooser.showDialog(this, "Elegir color", colorActual);
-
             if (elegido != null) {
                 colorActual = elegido;
                 lblColorActual.setBackground(elegido);
                 formato.AplicarColorFuente(elegido);
                 agregarColorReciente(elegido);
             }
-
             textPane.requestFocus();
         });
 
         cmbFuente.addActionListener(e -> {
-
             String fuente = (String) cmbFuente.getSelectedItem();
-
-            if (fuente != null)
-                formato.AplicarFuente(fuente);
-
+            if (fuente != null) formato.AplicarFuente(fuente);
         });
 
         Tamaño.addActionListener(e -> {
-
             try {
-
                 int tamano = Integer.parseInt((String) Tamaño.getSelectedItem());
                 formato.AplicarTamano(tamano);
-
             } catch (Exception ignored) {}
-
         });
     }
 
     private JPanel crearBarraHerramientas() {
-
         JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 3));
-        barra.setBackground(new Color(236,233,216));
-        barra.setBorder(new MatteBorder(0,0,1,0,new Color(180,180,180)));
+        barra.setBackground(new Color(236, 233, 216));
+        barra.setBorder(new MatteBorder(0, 0, 1, 0, new Color(180, 180, 180)));
 
-        btnAbrir.setPreferredSize(new Dimension(50,24));
+        btnAbrir.setPreferredSize(new Dimension(50, 24));
         barra.add(btnAbrir);
 
-        btnGuardar.setPreferredSize(new Dimension(50,24));
+        btnGuardar.setPreferredSize(new Dimension(50, 24));
         barra.add(btnGuardar);
-
-        btnSubrayado = new JToggleButton("U");
-        btnSubrayado.setPreferredSize(new Dimension(50,24));
-        barra.add(btnSubrayado);
-
-        btnCursiva = new JToggleButton("I");
-        btnCursiva.setFont(new Font("SansSerif", Font.ITALIC, 13));
-        btnCursiva.setPreferredSize(new Dimension(50,24));
-        barra.add(btnCursiva);
 
         btnNegrita = new JToggleButton("B");
         btnNegrita.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btnNegrita.setPreferredSize(new Dimension(50,24));
+        btnNegrita.setPreferredSize(new Dimension(50, 24));
         barra.add(btnNegrita);
 
-        btnTabla.setPreferredSize(new Dimension(70,24));
+        btnCursiva = new JToggleButton("I");
+        btnCursiva.setFont(new Font("SansSerif", Font.ITALIC, 13));
+        btnCursiva.setPreferredSize(new Dimension(50, 24));
+        barra.add(btnCursiva);
+
+        btnSubrayado = new JToggleButton("U");
+        btnSubrayado.setPreferredSize(new Dimension(50, 24));
+        barra.add(btnSubrayado);
+
+        btnTabla.setPreferredSize(new Dimension(70, 24));
         barra.add(btnTabla);
 
         return barra;
     }
 
-    private JPanel crearPanelCentral() {
-
+    // Recibe el scroll ya creado para no recrear el textPane
+    private JPanel crearPanelCentral(JScrollPane editorScroll) {
         JPanel panel = new JPanel(new BorderLayout());
-
         panel.add(crearPanelOpciones(), BorderLayout.WEST);
-        panel.add(crearEditor(), BorderLayout.CENTER);
-        panel.add(crearPanelColores(), BorderLayout.EAST);
-
+        panel.add(editorScroll,         BorderLayout.CENTER);
+        panel.add(crearPanelColores(),  BorderLayout.EAST);
         return panel;
     }
 
     private JPanel crearPanelOpciones() {
-
         JPanel panel = new JPanel(null);
-        panel.setPreferredSize(new Dimension(210,0));
-        panel.setBackground(new Color(236,233,216));
+        panel.setPreferredSize(new Dimension(210, 0));
+        panel.setBackground(new Color(236, 233, 216));
 
         JLabel lblFuente = new JLabel("Fuente");
-        lblFuente.setBounds(8,8,50,22);
+        lblFuente.setBounds(8, 8, 50, 22);
         panel.add(lblFuente);
 
         String[] fuentes = GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getAvailableFontFamilyNames();
-
+            .getLocalGraphicsEnvironment()
+            .getAvailableFontFamilyNames();
         cmbFuente = new JComboBox<>(fuentes);
         cmbFuente.setSelectedItem("Arial");
-        cmbFuente.setBounds(62,6,138,26);
+        cmbFuente.setBounds(62, 6, 138, 26);
         panel.add(cmbFuente);
 
         JLabel lblTamano = new JLabel("Tamaño");
-        lblTamano.setBounds(8,40,52,22);
+        lblTamano.setBounds(8, 40, 52, 22);
         panel.add(lblTamano);
 
         Tamaño = new JComboBox<>(TAMANOS);
         Tamaño.setSelectedItem("12");
-        Tamaño.setBounds(62,38,138,26);
+        Tamaño.setBounds(62, 38, 138, 26);
         panel.add(Tamaño);
 
         JLabel lblColor = new JLabel("Color");
-        lblColor.setBounds(8,72,40,22);
+        lblColor.setBounds(8, 72, 40, 22);
         panel.add(lblColor);
 
         lblColorActual = new JLabel();
         lblColorActual.setOpaque(true);
         lblColorActual.setBackground(Color.BLACK);
-        lblColorActual.setBorder(new LineBorder(Color.GRAY,1));
-        lblColorActual.setBounds(62,72,24,22);
+        lblColorActual.setBorder(new LineBorder(Color.GRAY, 1));
+        lblColorActual.setBounds(62, 72, 24, 22);
         panel.add(lblColorActual);
 
-        btnColor.setBounds(90,70,40,26);
+        btnColor.setBounds(90, 70, 40, 26);
         panel.add(btnColor);
 
         return panel;
     }
 
     private JScrollPane crearEditor() {
-
         textPane = new JTextPane();
-        textPane.setFont(new Font("Arial",Font.PLAIN,12));
-        textPane.setBorder(new EmptyBorder(10,10,10,10));
-
+        textPane.setFont(new Font("Arial", Font.PLAIN, 12));
+        textPane.setBorder(new EmptyBorder(10, 10, 10, 10));
         return new JScrollPane(textPane);
     }
 
     private JPanel crearPanelColores() {
-
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(100,0));
+        panel.setPreferredSize(new Dimension(100, 0));
+        panel.setBackground(new Color(236, 233, 216));
 
         JLabel lbl = new JLabel("Colores utilizados:");
-        lbl.setBorder(new EmptyBorder(4,4,2,4));
+        lbl.setBorder(new EmptyBorder(4, 4, 2, 4));
         panel.add(lbl, BorderLayout.NORTH);
 
         panelColoresRecientes = new JPanel(new FlowLayout());
-
+        panelColoresRecientes.setBackground(new Color(236, 233, 216));
         panel.add(panelColoresRecientes, BorderLayout.CENTER);
 
         return panel;
     }
 
     private void agregarColorReciente(Color color) {
-
-    int max = 10;
-
-    Color[] nuevos = new Color[Math.min(UltimosColores.length + 1, max)];
-    nuevos[0] = color;
-
-    for(int i=0;i<nuevos.length-1 && i<UltimosColores.length;i++){
-        nuevos[i+1] = UltimosColores[i];
+        int max = 10;
+        Color[] nuevos = new Color[Math.min(UltimosColores.length + 1, max)];
+        nuevos[0] = color;
+        for (int i = 0; i < nuevos.length - 1 && i < UltimosColores.length; i++) {
+            nuevos[i + 1] = UltimosColores[i];
+        }
+        UltimosColores = nuevos;
+        panelColoresRecientes.removeAll();
+        for (Color c : UltimosColores)
+            panelColoresRecientes.add(crearCubito(c));
+        panelColoresRecientes.revalidate();
+        panelColoresRecientes.repaint();
     }
 
-    UltimosColores = nuevos;
-
-    panelColoresRecientes.removeAll();
-
-    for(Color c : UltimosColores)
-        panelColoresRecientes.add(crearCubito(c));
-
-    panelColoresRecientes.revalidate();
-    panelColoresRecientes.repaint();
-}
-
     private JLabel crearCubito(Color color) {
-
-    JLabel celda = new JLabel();
-    celda.setOpaque(true);
-    celda.setBackground(color);
-    celda.setBorder(new LineBorder(Color.GRAY));
-    celda.setPreferredSize(new Dimension(14,14));
-
-    celda.addMouseListener(new java.awt.event.MouseAdapter() {
-        @Override
-        public void mouseClicked(java.awt.event.MouseEvent e) {
-            colorActual = color;
-            lblColorActual.setBackground(color);
-            formato.AplicarColorFuente(color);
-            textPane.requestFocus();
-        }
-    });
-
-    return celda;
-}
+        JLabel celda = new JLabel();
+        celda.setOpaque(true);
+        celda.setBackground(color);
+        celda.setBorder(new LineBorder(Color.GRAY));
+        celda.setPreferredSize(new Dimension(14, 14));
+        celda.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                colorActual = color;
+                lblColorActual.setBackground(color);
+                formato.AplicarColorFuente(color);
+                textPane.requestFocus();
+            }
+        });
+        return celda;
+    }
+    
+    
 }
