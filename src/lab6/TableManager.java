@@ -17,9 +17,6 @@ public class TableManager {
         this.textPane = textPane;
     }
 
-
-
-    
     //Muestra un diálogo que pide filas y columnas,
      
     public void mostrarDialogoCrearTabla(JFrame parent) {

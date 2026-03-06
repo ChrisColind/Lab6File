@@ -6,10 +6,10 @@ import java.awt.*;
 
 public class GUI extends JFrame {
 
-    // ── Componentes ───────────────────────────────────────────────────────
+    //Componentes
     private JTextPane         textPane;
     private JComboBox<String> cmbFuente;
-    private JComboBox<String> cmbTamano;
+    private JComboBox<String> Tamaño;
     private JLabel            lblColorActual;
     private JPanel            panelColoresRecientes;
     
@@ -19,8 +19,6 @@ public class GUI extends JFrame {
     JToggleButton btnNegrita;
     JToggleButton btnCursiva;
     JToggleButton btnSubrayado;
-    JButton btnAceptar  = new JButton("Aceptar");
-    JButton btnCancelar = new JButton("Cancelar");
     JButton btnTabla = new JButton("Tabla");
     
     // Tama;os disponibles 
@@ -30,11 +28,12 @@ public class GUI extends JFrame {
     };
 
     //Ultimos colores
-    private static final Color[] COLORES = {
-        //guarda los ultimos colores guardados
-        Color.red
+    private Color[] UltimosColores = { 
+        Color.RED
     };
-
+    
+    private Color colorActual = Color.BLACK;
+    
     public GUI() {
         
         setTitle("Editor de texto");
@@ -47,16 +46,24 @@ public class GUI extends JFrame {
         add(crearPanelCentral(),BorderLayout.CENTER);
         add(crearPanelBotones(),BorderLayout.SOUTH);
         
+        //contiene: negrita, cursiva, tama;o, color, fuente
+        FormatoTexto formato = new FormatoTexto(textPane);
+        //contiene el codigo logica de las tablas
+        TableManager tablas  = new TableManager(textPane);
+        
         btnNegrita.addActionListener(e -> {
             // logica negrita
+            formato.AplicarNegrita(btnNegrita.isSelected());
         });
 
         btnCursiva.addActionListener(e -> {
-            // logica cursiva
+            //logica cursiva
+            formato.AplicarCursiva(btnCursiva.isSelected());
         });
 
         btnSubrayado.addActionListener(e -> {
             // logica subrayado
+            formato.AplicarSubrayado(btnSubrayado.isSelected());
         });
 
         btnTabla.addActionListener(e -> {
@@ -69,17 +76,47 @@ public class GUI extends JFrame {
 
         btnColor.addActionListener(e -> {
             // logica abrir JColorChooser
+            Color elegido = JColorChooser.showDialog(this, "Elegir color", colorActual);
+            if (elegido != null) {
+                colorActual = elegido;
+                lblColorActual.setBackground(elegido); // actualiza el cuadrito visual
+                formato.AplicarColorFuente(elegido);   // aplica el color al texto
+                agregarColorReciente(elegido);          // agrega al panel de colores
+            }
+            textPane.requestFocus();
         });
 
         cmbFuente.addActionListener(e -> {
             // logica cambiar fuente
+            String fuente = (String) cmbFuente.getSelectedItem();
+            if (fuente != null) formato.AplicarFuente(fuente);
         });
 
-        cmbTamano.addActionListener(e -> {
+        Tamaño.addActionListener(e -> {
             // logica cambiar tamaño
+            try {   
+                int tamano = Integer.parseInt((String) Tamaño.getSelectedItem());
+                formato.AplicarTamano(tamano);
+            } catch (NumberFormatException ignored) {}
         });
     }
+    
+    private void agregarColorReciente(Color color) {
+        // Agregar el color al arreglo (desplazando los anteriores)
+        Color[] nuevos = new Color[UltimosColores.length + 1];
+        nuevos[0] = color;
+        System.arraycopy(UltimosColores, 0, nuevos, 1, UltimosColores.length);
+        UltimosColores = nuevos;
 
+        // Redibujar el panel de colores
+        panelColoresRecientes.removeAll();
+        for (Color c : UltimosColores) {
+            panelColoresRecientes.add(crearCubito(c));
+        }
+        panelColoresRecientes.revalidate();
+        panelColoresRecientes.repaint();
+    }
+    
     // Guardado
     private JPanel crearBarraHerramientas() {
         JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 3));
@@ -159,11 +196,11 @@ public class GUI extends JFrame {
         lblTamano.setBounds(8, 40, 52, 22);
         panel.add(lblTamano);
 
-        cmbTamano = new JComboBox<>(TAMANOS);
-        cmbTamano.setSelectedItem("12");
-        cmbTamano.setBounds(62, 38, 138, 26);
-        cmbTamano.setBackground(Color.WHITE);
-        panel.add(cmbTamano);
+        Tamaño = new JComboBox<>(TAMANOS);
+        Tamaño.setSelectedItem("12");
+        Tamaño.setBounds(62, 38, 138, 26);
+        Tamaño.setBackground(Color.WHITE);
+        panel.add(Tamaño);
 
         // JLABEL Color
         JLabel lblColor = new JLabel("Color");
@@ -184,6 +221,18 @@ public class GUI extends JFrame {
         panel.add(btnColor);    
 
         return panel;
+    }
+    
+    //cubito de los ultimos colores
+    private JLabel crearCubito(Color color) {
+        JLabel celda = new JLabel();
+        celda.setOpaque(true);
+        celda.setBackground(color);
+        celda.setBorder(new LineBorder(new Color(160, 160, 160), 1));
+        celda.setPreferredSize(new Dimension(14, 14));
+        celda.setMinimumSize(new Dimension(14, 14));
+        celda.setMaximumSize(new Dimension(14, 14));
+        return celda;
     }
 
     // JText, centro
@@ -214,12 +263,12 @@ public class GUI extends JFrame {
         panelColoresRecientes.setBackground(new Color(236, 233, 216));
         panelColoresRecientes.setBorder(new EmptyBorder(2, 4, 2, 4));
 
-        for (Color c : COLORES) {
+        for (Color c : UltimosColores) {
             JLabel celda = new JLabel();
             celda.setOpaque(true);
             celda.setBackground(c);
             celda.setBorder(new LineBorder(new Color(160, 160, 160), 1));
-            celda.setPreferredSize(new Dimension(14, 14));  // cuadrado exacto
+            celda.setPreferredSize(new Dimension(14, 14));  
             celda.setMinimumSize(new Dimension(14, 14));
             celda.setMaximumSize(new Dimension(14, 14));
             panelColoresRecientes.add(celda);
@@ -235,12 +284,6 @@ public class GUI extends JFrame {
         panel.setBackground(new Color(236, 233, 216));
         panel.setBorder(new MatteBorder(1, 0, 0, 0, new Color(180, 180, 180)));
 
-
-        btnAceptar.setPreferredSize(new Dimension(90, 26));
-        btnCancelar.setPreferredSize(new Dimension(90, 26));
-
-        panel.add(btnAceptar);
-        panel.add(btnCancelar);
         return panel;
     }
 
