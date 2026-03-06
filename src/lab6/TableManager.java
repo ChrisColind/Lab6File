@@ -3,7 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package lab6;
-
+/**
+ *
+ * @author gpopo
+ */
 import org.apache.poi.xwpf.usermodel.*;
 import javax.swing.*;
 import javax.swing.table.*;
