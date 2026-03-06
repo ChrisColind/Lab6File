@@ -5,6 +5,7 @@
 package lab6;
 
 import java.awt.Color;
+import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -24,7 +25,17 @@ public class FormatoTexto {
 
     //retorna el texto que el usario selecciono
     public String TextoSeleccionado() {
-        return textPane.getSelectedText();
+        try {
+            String seleccion = textPane.getSelectedText();
+            if (seleccion == null) {
+                return "";
+            }
+            return seleccion;
+        } catch (Exception e) {
+            System.out.println("Error al obtener texto seleccionado: " + e.getMessage());
+            return "";
+        }
+
     }
 
     // metodo que retorna en donde se inicia la seleccion
@@ -44,11 +55,19 @@ public class FormatoTexto {
 
     // Metodo que obtiene el estilo del texto(es el que maneja todo el formato de texto)
     public StyledDocument ObtenerDocumento() {
-        return textPane.getStyledDocument();
+        StyledDocument doc = textPane.getStyledDocument();
+        if(doc == null){
+            JOptionPane.showMessageDialog(null, "Error: El documento es nulo");
+        }
+        return doc;
     }
 
     //crear atributos para la fuente
     public SimpleAttributeSet AtributosFuente(String NameFuente) {
+        if (NameFuente == null || NameFuente.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Error: Nombre de fuente no valido");
+            return new SimpleAttributeSet();
+        }
         SimpleAttributeSet atributos = new SimpleAttributeSet();
         StyleConstants.setFontFamily(atributos, NameFuente);
         return atributos;
@@ -84,6 +103,10 @@ public class FormatoTexto {
     //atributos para el color de la fuente
 
     public SimpleAttributeSet AtributosColorFuente(Color color) {
+        if (color == null) {
+            JOptionPane.showMessageDialog(null, "Error: El color no puede ser nulo");
+            return new SimpleAttributeSet();
+        }
         SimpleAttributeSet atributos = new SimpleAttributeSet();
         StyleConstants.setForeground(atributos, color);
         return atributos;
@@ -91,6 +114,10 @@ public class FormatoTexto {
     //atributos para el color para el fondo del texto
 
     public SimpleAttributeSet AtributosColorFondo(Color color) {
+        if (color == null) {
+            JOptionPane.showMessageDialog(null, "Error: El color de fondo no puede ser nulo");
+            return new SimpleAttributeSet();
+        }
         SimpleAttributeSet atributos = new SimpleAttributeSet();
         StyleConstants.setBackground(atributos, color);
         return atributos;
@@ -105,36 +132,50 @@ public class FormatoTexto {
 
     // metodo que aplica los atributos anteriores
     public void AplicarAtributos(SimpleAttributeSet atributos) {
-        StyledDocument doc = ObtenerDocumento();
-        int inicio = InicioSeleccion();
-        int fin = FinSeleccion();
+        try {
+            StyledDocument doc = ObtenerDocumento();
+            int inicio = InicioSeleccion();
+            int fin = FinSeleccion();
 
-        if (HaySeleccion()) {
-            doc.setCharacterAttributes(inicio, fin - inicio, atributos, false);
-        } else {
-            textPane.setCharacterAttributes(atributos, false);
+            if (HaySeleccion()) {
+                doc.setCharacterAttributes(inicio, fin - inicio, atributos, false);
+            } else {
+                textPane.setCharacterAttributes(atributos, false);
+            }
+        } catch (Exception e) {
+            System.out.println("Error al aplicar formato al texto" + e.getMessage());
         }
+
     }
 
     //aplicar atributos de alineacion
     public void AplicarAtributosAlineacion(SimpleAttributeSet atributos) {
-        StyledDocument doc = ObtenerDocumento();
-        int inicio = InicioSeleccion();
-        int fin = FinSeleccion();
+        try {
+            StyledDocument doc = ObtenerDocumento();
+            int inicio = InicioSeleccion();
+            int fin = FinSeleccion();
 
-        if (HaySeleccion()) {
-            doc.setParagraphAttributes(inicio, fin - inicio, atributos, false);
-        } else {
-            doc.setParagraphAttributes(inicio, 1, atributos, false);
+            if (HaySeleccion()) {
+                doc.setParagraphAttributes(inicio, fin - inicio, atributos, false);
+            } else {
+                doc.setParagraphAttributes(inicio, 1, atributos, false);
+            }
+        } catch (Exception e) {
+            System.out.println("Error al aplicar formato al parrafo" + e.getMessage());
         }
 
     }
 
     // cambia el tamano del texto seleccionado
     public void AplicarTamano(int tamano) {
-        SimpleAttributeSet atributos = AtributosTamano(tamano);
-        AplicarAtributos(atributos);
-        textPane.requestFocus();
+        try {
+            SimpleAttributeSet atributos = AtributosTamano(tamano);
+            AplicarAtributos(atributos);
+            textPane.requestFocus();
+        } catch (NumberFormatException e) {
+            System.out.println("El tamano ingresado no es un numero valido: " + e.getMessage());
+        }
+
     }
 
     //cambia la fuente del texto
@@ -165,20 +206,22 @@ public class FormatoTexto {
         textPane.requestFocus();
     }
     // cambiar color de la fuente
-    
+
     public void AplicarColorFuente(Color color) {
         SimpleAttributeSet atributos = AtributosColorFuente(color);
         AplicarAtributos(atributos);
         textPane.requestFocus();
     }
+
     // cambiar color del fondo del texto
-     public void AplicarColorFondo(Color color) {
+    public void AplicarColorFondo(Color color) {
         SimpleAttributeSet atributos = AtributosColorFondo(color);
         AplicarAtributos(atributos);
         textPane.requestFocus();
     }
-     // cambiar la alineacion del texto
-       public void AplicarAlineacion(int alineacion) {
+    // cambiar la alineacion del texto
+
+    public void AplicarAlineacion(int alineacion) {
         SimpleAttributeSet atributos = AtributosAlineacion(alineacion);
         AplicarAtributos(atributos);
         textPane.requestFocus();
