@@ -49,6 +49,8 @@ public class GUI extends JFrame {
         barra.setBackground(new Color(236, 233, 216));
         barra.setBorder(new MatteBorder(0, 0, 1, 0, new Color(180, 180, 180)));
         JButton btnGuardar = new JButton("💾");
+        //logica de guardado
+        
         barra.add(btnGuardar);  
 
         return barra;
@@ -84,7 +86,6 @@ public class GUI extends JFrame {
         cmbFuente.setSelectedItem("Arial");
         cmbFuente.setBounds(62, 6, 138, 26);
         cmbFuente.setBackground(Color.WHITE);
-        panel.add(cmbFuente);
 
         // JLABEL Tamaño
         JLabel lblTamano = new JLabel("Tamaño");
