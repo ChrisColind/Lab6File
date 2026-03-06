@@ -12,7 +12,7 @@ public class GUI extends JFrame {
     private JComboBox<String> cmbTamano;
     private JLabel            lblColorActual;
     private JPanel            panelColoresRecientes;
-
+    JButton btnColor = new JButton("...");
     // Tama;os disponibles 
     private static final String[] TAMANOS= {
         "8","9","10","11","12","14","16","18","20","24",
@@ -22,9 +22,12 @@ public class GUI extends JFrame {
     //Ultimos colores
     private static final Color[] COLORES = {
         //guarda los ultimos colores guardados
+        Color.red
     };
 
     public GUI() {
+        
+        
         setTitle("Editor de texto");
         setSize(900, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,6 +37,10 @@ public class GUI extends JFrame {
         add(crearBarraGuardado(),BorderLayout.NORTH);
         add(crearPanelCentral(),BorderLayout.CENTER);
         add(crearPanelBotones(),BorderLayout.SOUTH);
+        
+        btnColor.addActionListener(e -> {
+            Color elegido = JColorChooser.showDialog(this, "Elegir color", Color.black);
+        });
     }
 
     // Guardado
@@ -94,7 +101,8 @@ public class GUI extends JFrame {
         JLabel lblColor = new JLabel("Color");
         lblColor.setBounds(8, 72, 40, 22);
         panel.add(lblColor);
-
+        
+        //muestra el color que se esta usando en el momento
         lblColorActual = new JLabel();
         lblColorActual.setOpaque(true);
         lblColorActual.setBackground(Color.BLACK);
@@ -102,10 +110,10 @@ public class GUI extends JFrame {
         lblColorActual.setBounds(62, 72, 24, 22);
         panel.add(lblColorActual);
 
-        JButton btnColor = new JButton("...");
         btnColor.setBounds(90, 70, 40, 26);
         btnColor.setFont(new Font("SansSerif", Font.PLAIN, 11));
-        panel.add(btnColor);
+        btnColor.setFocusPainted(false);
+        panel.add(btnColor);    
 
         return panel;
     }
