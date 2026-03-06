@@ -116,7 +116,7 @@ public class GUI extends JFrame {
         btnTabla.setFont(new Font("SansSerif", Font.PLAIN, 12));
         btnTabla.setPreferredSize(new Dimension(70, 24));
         btnTabla.setFocusPainted(false);
-        barra.add(btnTabla);
+        barra.add(btnTabla);    
         
         return barra;
     }
@@ -255,11 +255,6 @@ public class GUI extends JFrame {
 
     //main por mientras
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception ignored) {}
-            new GUI().setVisible(true);
-        });
+        
     }
 }
