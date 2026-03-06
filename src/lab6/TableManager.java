@@ -62,40 +62,75 @@ public class TableManager {
    
      
     private void insertarTablaEnEditor(JFrame parent, int filas, int cols) {
-        // Crear modelo de tabla vacioo
-        DefaultTableModel modelo = new DefaultTableModel(filas, cols);
 
-        for (int i = 0; i < cols; i++) {
-            modelo.setColumnIdentifiers(generarEncabezados(cols));
+    // Crear modelo de tabla
+    DefaultTableModel modelo = new DefaultTableModel(filas, cols);
+    modelo.setColumnIdentifiers(generarEncabezados(cols));
+
+    JTable tabla = new JTable(modelo);
+
+    // Estética de la tabla
+    tabla.setGridColor(Color.GRAY);
+    tabla.setShowGrid(true);
+    tabla.setBackground(Color.WHITE);
+    tabla.getTableHeader().setBackground(new Color(220, 220, 220));
+
+    // Editor personalizado que toma el formato actual del JTextPane
+    tabla.setDefaultEditor(Object.class, new DefaultCellEditor(new JTextField()) {
+
+        @Override
+        public Component getTableCellEditorComponent(
+                JTable table,
+                Object value,
+                boolean isSelected,
+                int row,
+                int column) {
+
+            JTextField editor = (JTextField) super.getTableCellEditorComponent(
+                    table, value, isSelected, row, column);
+
+            // Obtener atributos actuales del editor
+            javax.swing.text.AttributeSet attrs = textPane.getCharacterAttributes();
+
+            String fuente = javax.swing.text.StyleConstants.getFontFamily(attrs);
+            int tamano = javax.swing.text.StyleConstants.getFontSize(attrs);
+            boolean negrita = javax.swing.text.StyleConstants.isBold(attrs);
+            boolean cursiva = javax.swing.text.StyleConstants.isItalic(attrs);
+
+            int estilo = Font.PLAIN;
+            if (negrita) estilo |= Font.BOLD;
+            if (cursiva) estilo |= Font.ITALIC;
+
+            Font fuenteActual = new Font(fuente, estilo, tamano);
+            editor.setFont(fuenteActual);
+
+            // Aplicar color del texto
+            Color color = javax.swing.text.StyleConstants.getForeground(attrs);
+            editor.setForeground(color);
+
+            return editor;
         }
+    });
 
-        JTable tabla = new JTable(modelo);
-        tabla.setGridColor(Color.GRAY);
-        tabla.setShowGrid(true);
-        tabla.setRowHeight(24);
-        tabla.setBackground(Color.WHITE);
-        tabla.getTableHeader().setBackground(new Color(220, 220, 220));
-        tabla.setPreferredScrollableViewportSize(
-            new Dimension(400, filas * 24 + 20)
+    tabla.setRowHeight(24);
+
+    JScrollPane scrollTabla = new JScrollPane(tabla);
+    scrollTabla.setPreferredSize(
+        new Dimension(cols * 100, filas * 24 + 30)
+    );
+
+    // Insertar tabla en el JTextPane
+    textPane.setCaretPosition(textPane.getDocument().getLength());
+    textPane.insertComponent(scrollTabla);
+
+    try {
+        textPane.getDocument().insertString(
+            textPane.getDocument().getLength(), "\n", null
         );
-
-        JScrollPane scrollTabla = new JScrollPane(tabla);
-        scrollTabla.setPreferredSize(
-            new Dimension(cols * 100, filas * 24 + 30)
-        );
-
-
-        textPane.setCaretPosition(textPane.getDocument().getLength());
-        textPane.insertComponent(scrollTabla);
-
-        try {
-            textPane.getDocument().insertString(
-                textPane.getDocument().getLength(), "\n", null
-            );
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    } catch (Exception ex) {
+        ex.printStackTrace();
     }
+}
 
     
      // Busca todas las JTable dentro del JTextPane
@@ -173,6 +208,16 @@ public class TableManager {
 
             // Insertar en el editor
             JTable tabla = new JTable(modelo);
+            
+            Font fuenteActual = obtenerFuenteActual();
+
+            tabla.setFont(fuenteActual);
+            tabla.setRowHeight(fuenteActual.getSize() + 12);
+
+            DefaultCellEditor editor = new DefaultCellEditor(new JTextField());
+            editor.getComponent().setFont(fuenteActual);
+            tabla.setDefaultEditor(Object.class, editor);
+
             tabla.setGridColor(Color.GRAY);
             tabla.setShowGrid(true);
             tabla.setRowHeight(24);
@@ -194,6 +239,25 @@ public class TableManager {
                 e.printStackTrace();
             }
         }
+    }
+    
+    private Font obtenerFuenteActual() {
+
+        javax.swing.text.AttributeSet attrs =
+            textPane.getCharacterAttributes();
+
+        String fuente = javax.swing.text.StyleConstants.getFontFamily(attrs);
+        int tamano = javax.swing.text.StyleConstants.getFontSize(attrs);
+
+        boolean negrita = javax.swing.text.StyleConstants.isBold(attrs);
+        boolean cursiva = javax.swing.text.StyleConstants.isItalic(attrs);
+
+        int estilo = Font.PLAIN;
+
+        if(negrita) estilo |= Font.BOLD;
+        if(cursiva) estilo |= Font.ITALIC;
+
+        return new Font(fuente, estilo, tamano);
     }
     
     private String[] generarEncabezados(int cols) {
