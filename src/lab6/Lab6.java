@@ -4,6 +4,9 @@
  */
 package lab6;
 
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
 /**
  *
  * @author croge
@@ -14,8 +17,14 @@ public class Lab6 {
      * @param args the command line arguments
      */
    
-    public static void main(String[] args) {
-        
+        public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ignored) {}
+            new GUI().setVisible(true);
+        });
+    
     }
     
 }

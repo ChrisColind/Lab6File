@@ -253,8 +253,4 @@ public class GUI extends JFrame {
         return btn;
     }
 
-    //main por mientras
-    public static void main(String[] args) {
-        
-    }
 }
