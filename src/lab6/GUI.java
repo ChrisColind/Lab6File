@@ -12,7 +12,17 @@ public class GUI extends JFrame {
     private JComboBox<String> cmbTamano;
     private JLabel            lblColorActual;
     private JPanel            panelColoresRecientes;
+    
+    //botones
+    JButton btnGuardar = new JButton("💾");
     JButton btnColor = new JButton("...");
+    JToggleButton btnNegrita;
+    JToggleButton btnCursiva;
+    JToggleButton btnSubrayado;
+    JButton btnAceptar  = new JButton("Aceptar");
+    JButton btnCancelar = new JButton("Cancelar");
+    JButton btnTabla = new JButton("Tabla");
+    
     // Tama;os disponibles 
     private static final String[] TAMANOS= {
         "8","9","10","11","12","14","16","18","20","24",
@@ -27,32 +37,87 @@ public class GUI extends JFrame {
 
     public GUI() {
         
-        
         setTitle("Editor de texto");
         setSize(900, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        add(crearBarraGuardado(),BorderLayout.NORTH);
+        add(crearBarraHerramientas(),BorderLayout.NORTH);
         add(crearPanelCentral(),BorderLayout.CENTER);
         add(crearPanelBotones(),BorderLayout.SOUTH);
         
+        btnNegrita.addActionListener(e -> {
+            // logica negrita
+        });
+
+        btnCursiva.addActionListener(e -> {
+            // logica cursiva
+        });
+
+        btnSubrayado.addActionListener(e -> {
+            // logica subrayado
+        });
+
+        btnTabla.addActionListener(e -> {
+            // logica insertar tabla
+        });
+
+        btnGuardar.addActionListener(e -> {
+            // logica guardar archivo
+        });
+
         btnColor.addActionListener(e -> {
-            Color elegido = JColorChooser.showDialog(this, "Elegir color", Color.black);
+            // logica abrir JColorChooser
+        });
+
+        cmbFuente.addActionListener(e -> {
+            // logica cambiar fuente
+        });
+
+        cmbTamano.addActionListener(e -> {
+            // logica cambiar tamaño
         });
     }
 
     // Guardado
-    private JPanel crearBarraGuardado() {
+    private JPanel crearBarraHerramientas() {
         JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 3));
         barra.setBackground(new Color(236, 233, 216));
         barra.setBorder(new MatteBorder(0, 0, 1, 0, new Color(180, 180, 180)));
-        JButton btnGuardar = new JButton("💾");
-        //logica de guardado
         
-        barra.add(btnGuardar);  
+        //guardar===================================================
+        btnGuardar.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        btnGuardar.setPreferredSize(new Dimension(50, 24));
+        btnGuardar.setFocusPainted(false);
+        barra.add(btnGuardar);
 
+        //Subrayado===================================================
+        btnSubrayado = new JToggleButton("U");
+        btnSubrayado.setPreferredSize(new Dimension(50, 24));
+        btnSubrayado.setFocusPainted(false);
+        barra.add(btnSubrayado);
+        
+        //Cursiva===================================================
+        btnCursiva = new JToggleButton("I");
+        btnCursiva.setFont(new Font("SansSerif", Font.ITALIC, 13));
+        btnCursiva.setPreferredSize(new Dimension(50, 24));
+        btnCursiva.setFocusPainted(false);
+        barra.add(btnCursiva);
+        
+        // Negrita===================================================
+        btnNegrita = new JToggleButton("B");
+        btnNegrita.setFont(new Font("SansSerif", Font.BOLD, 13));
+        btnNegrita.setPreferredSize(new Dimension(50, 24));
+        btnNegrita.setFocusPainted(false);
+        barra.add(btnNegrita);
+        
+        //Tabla==================================================
+        btnTabla.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        btnTabla.setPreferredSize(new Dimension(70, 24));
+        btnTabla.setFocusPainted(false);
+        barra.add(btnTabla);
+        
         return barra;
     }
 
@@ -86,6 +151,8 @@ public class GUI extends JFrame {
         cmbFuente.setSelectedItem("Arial");
         cmbFuente.setBounds(62, 6, 138, 26);
         cmbFuente.setBackground(Color.WHITE);
+        
+        panel.add(cmbFuente);
 
         // JLABEL Tamaño
         JLabel lblTamano = new JLabel("Tamaño");
@@ -168,8 +235,6 @@ public class GUI extends JFrame {
         panel.setBackground(new Color(236, 233, 216));
         panel.setBorder(new MatteBorder(1, 0, 0, 0, new Color(180, 180, 180)));
 
-        JButton btnAceptar  = new JButton("Aceptar");
-        JButton btnCancelar = new JButton("Cancelar");
 
         btnAceptar.setPreferredSize(new Dimension(90, 26));
         btnCancelar.setPreferredSize(new Dimension(90, 26));
