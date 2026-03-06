@@ -20,7 +20,7 @@ public class TableManager {
 
 
     
-    //Muestra un diálogo que pide filas y columnas,
+    //Muestra un dialogo que pide filas y columnas,
      
     public void mostrarDialogoCrearTabla(JFrame parent) {
         // Pedir numero de filas
@@ -35,7 +35,7 @@ public class TableManager {
         // Pedir numero de columnas
         String inputCols = JOptionPane.showInputDialog(
             parent,
-            "¿Cuántas columnas?",
+            "¿Cuantas columnas?",
             "Crear tabla",
             JOptionPane.QUESTION_MESSAGE
         );
@@ -46,14 +46,14 @@ public class TableManager {
             int cols  = Integer.parseInt(inputCols.trim());
 
             if (filas <= 0 || cols <= 0) {
-                JOptionPane.showMessageDialog(parent, "Ingresa números mayores a 0.");
+                JOptionPane.showMessageDialog(parent, "Ingresa numeros mayores a 0.");
                 return;
             }
 
             insertarTablaEnEditor(parent, filas, cols);
 
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(parent, "Por favor ingresa solo números.");
+            JOptionPane.showMessageDialog(parent, "Por favor ingresa solo numeros.");
         }
     }
    
