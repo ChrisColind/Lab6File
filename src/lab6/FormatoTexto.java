@@ -4,7 +4,10 @@
  */
 package lab6;
 
+import java.awt.Color;
 import javax.swing.JTextPane;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 /**
@@ -37,4 +40,46 @@ public class FormatoTexto {
     public StyledDocument ObtenerDocumento(){
         return textPane.getStyledDocument();
     }
+    
+    //crear atributos para la fuente
+    public SimpleAttributeSet AtributosFuente(String NameFuente){
+        SimpleAttributeSet atributos = new SimpleAttributeSet();
+        StyleConstants.setFontFamily(atributos, NameFuente);
+        return atributos;
+    }
+    //crear atributos para el tamanio del texto
+    public SimpleAttributeSet AtributosTamano(int tamano){
+        SimpleAttributeSet atributos = new SimpleAttributeSet();
+        StyleConstants.setFontSize(atributos, tamano);
+        return atributos;
+    }
+    //atributos para negrita
+    public SimpleAttributeSet AtributosNegrita(boolean activar){
+        SimpleAttributeSet atributos = new SimpleAttributeSet();
+        StyleConstants.setBold(atributos, activar);
+        return atributos;
+    }
+    //atributos para subrayado
+     public SimpleAttributeSet AtributosSubrayado(boolean activar){
+        SimpleAttributeSet atributos = new SimpleAttributeSet();
+        StyleConstants.setUnderline(atributos, activar);
+        return atributos;
+    }
+     //atributos para cursiva
+      public SimpleAttributeSet AtributosCursiva(boolean activar){
+        SimpleAttributeSet atributos = new SimpleAttributeSet();
+        StyleConstants.setItalic(atributos, activar);
+        return atributos;
+    }
+      //atributos para el color de la fuente
+       public SimpleAttributeSet AtributosColorFuente(Color color){
+           SimpleAttributeSet atributos = new SimpleAttributeSet();
+           StyleConstants.setForeground(atributos, color);
+           return atributos;
+       }
+           public SimpleAttributeSet AtributosColorFondo(Color color){
+           SimpleAttributeSet atributos = new SimpleAttributeSet();
+           StyleConstants.setBackground(atributos, color);
+           return atributos;
+       }
 }
